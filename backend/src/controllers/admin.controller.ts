@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { query } from '../config/database';
-import { logAudit } from '../services/audit.service';
-import { getAuditLogs } from '../services/audit.service';
+import { query as dbQuery } from '../config/database';
+import { logAudit as auditLog } from '../services/audit.service';
+import { getAuditLogs as fetchAuditLogs } from '../services/audit.service';
 
 export const getDashboardStats = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -12,38 +12,38 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
         }
 
         // Get total users
-        const [{ total_users }] = await query<any[]>(
+        const [{ total_users }] = await dbQuery<any[]>(
             "SELECT COUNT(*) as total_users FROM USERS WHERE role = 'MEMBER'"
         );
 
         // Get total books
-        const [totalBooksResult] = await query<any[]>('SELECT COUNT(*) as count FROM BOOKS');
+        const [totalBooksResult] = await dbQuery<any[]>('SELECT COUNT(*) as count FROM BOOKS');
 
         // Get total users
-        const [totalUsersResult] = await query<any[]>('SELECT COUNT(*) as count FROM USERS');
-        const [activeUsersResult] = await query<any[]>(
+        const [totalUsersResult] = await dbQuery<any[]>('SELECT COUNT(*) as count FROM USERS');
+        const [activeUsersResult] = await dbQuery<any[]>(
             'SELECT COUNT(*) as count FROM USERS WHERE status = ?',
             ['ACTIVE']
         );
 
         // Get pending requests
-        const [pendingRequestsResult] = await query<any[]>(
+        const [pendingRequestsResult] = await dbQuery<any[]>(
             'SELECT COUNT(*) as count FROM REQUESTS WHERE status = ?',
             ['PENDING']
         );
 
         // Get issued and overdue books
-        const [issuedBooksResult] = await query<any[]>(
+        const [issuedBooksResult] = await dbQuery<any[]>(
             'SELECT COUNT(*) as count FROM ISSUED_BOOKS WHERE status IN (?, ?)',
             ['ISSUED', 'OVERDUE']
         );
-        const [overdueBooksResult] = await query<any[]>(
+        const [overdueBooksResult] = await dbQuery<any[]>(
             'SELECT COUNT(*) as count FROM ISSUED_BOOKS WHERE status = ?',
             ['OVERDUE']
         );
 
         // Get today's revenue
-        const [todayRevenueResult] = await query<any[]>(
+        const [todayRevenueResult] = await dbQuery<any[]>(
             `SELECT COALESCE(SUM(amount), 0) as revenue 
              FROM PAYMENTS 
              WHERE status = ? AND DATE(transaction_date) = CURDATE()`,
@@ -51,7 +51,7 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
         );
 
         // Get outstanding penalties
-        const [penaltiesResult] = await query<any[]>(
+        const [penaltiesResult] = await dbQuery<any[]>(
             `SELECT COALESCE(SUM(penalty_amount), 0) as penalties 
              FROM ISSUED_BOOKS 
              WHERE penalty_amount > 0 AND status != ?`,
@@ -59,11 +59,11 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
         );
 
         // Get batch distribution
-        const [morningBatchResult] = await query<any[]>(
+        const [morningBatchResult] = await dbQuery<any[]>(
             'SELECT COUNT(*) as count FROM USERS WHERE batch = ? AND status = ?',
             ['MORNING', 'ACTIVE']
         );
-        const [eveningBatchResult] = await query<any[]>(
+        const [eveningBatchResult] = await dbQuery<any[]>(
             'SELECT COUNT(*) as count FROM USERS WHERE batch = ? AND status = ?',
             ['EVENING', 'ACTIVE']
         );
@@ -95,7 +95,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
             return;
         }
 
-        const users = await query<any[]>(
+        const users = await dbQuery<any[]>(
             `SELECT user_id, full_name, email, phone, role, batch, time_slot, status, created_at 
        FROM USERS 
        ORDER BY created_at DESC`
@@ -127,18 +127,18 @@ export const updateUserStatus = async (req: Request, res: Response): Promise<voi
             return;
         }
 
-        await query(
+        await dbQuery(
             'UPDATE USERS SET status = ? WHERE user_id = ?',
             [status, user_id]
         );
 
-        await logAudit({
+        await auditLog({
             action: 'USER_STATUS_UPDATED',
             entityType: 'USER',
             entityId: user_id,
             performedBy: req.user.userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
+            userAgent: req.get('user-agent'),
             details: { new_status: status }
         });
 
@@ -164,7 +164,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         }
 
         // Check if email already exists
-        const existingUsers = await query<any[]>(
+        const existingUsers = await dbQuery<any[]>(
             'SELECT * FROM USERS WHERE email = ?',
             [email]
         );
@@ -177,20 +177,20 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         const saltRounds = 10;
         const password_hash = await bcrypt.hash(password, saltRounds);
 
-        const result = await query<any>(
+        const result = await dbQuery<any>(
             'INSERT INTO USERS (full_name, email, phone, password_hash, role, batch, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [full_name, email, phone || null, password_hash, role, batch || null, 'ACTIVE']
         );
 
         const userId = result.insertId;
 
-        await logAudit({
+        await auditLog({
             action: 'USER_CREATED_BY_ADMIN',
             entityType: 'USER',
             entityId: userId,
             performedBy: req.user.userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
+            userAgent: req.get('user-agent'),
             details: { email, role, batch }
         });
 
@@ -219,18 +219,18 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
             return;
         }
 
-        await query(
+        await dbQuery(
             'UPDATE USERS SET full_name = ?, email = ?, phone = ?, role = ?, batch = ?, time_slot = ? WHERE user_id = ?',
             [full_name, email, phone || null, role, batch || null, time_slot || null, userId]
         );
 
-        await logAudit({
+        await auditLog({
             action: 'USER_UPDATED_BY_ADMIN',
             entityType: 'USER',
             entityId: userId,
             performedBy: req.user.userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
+            userAgent: req.get('user-agent'),
             details: { full_name, email, role, batch, time_slot }
         });
 
@@ -259,18 +259,18 @@ export const resetUserPassword = async (req: Request, res: Response): Promise<vo
         const saltRounds = 10;
         const password_hash = await bcrypt.hash(password, saltRounds);
 
-        await query(
+        await dbQuery(
             'UPDATE USERS SET password_hash = ? WHERE user_id = ?',
             [password_hash, userId]
         );
 
-        await logAudit({
+        await auditLog({
             action: 'USER_PASSWORD_RESET_BY_ADMIN',
             entityType: 'USER',
             entityId: userId,
             performedBy: req.user.userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent']
+            userAgent: req.get('user-agent')
         });
 
         res.status(200).json({ message: 'User password reset successfully' });
@@ -282,7 +282,7 @@ export const resetUserPassword = async (req: Request, res: Response): Promise<vo
 
 export const getSystemSettings = async (req: Request, res: Response): Promise<void> => {
     try {
-        const settings = await query<any[]>('SELECT setting_key, setting_value FROM SYSTEM_SETTINGS');
+        const settings = await dbQuery<any[]>('SELECT setting_key, setting_value FROM SYSTEM_SETTINGS');
         const settingsMap = settings.reduce((acc, curr) => {
             acc[curr.setting_key] = curr.setting_value;
             return acc;
@@ -309,19 +309,19 @@ export const updateSystemSettings = async (req: Request, res: Response): Promise
         }
 
         for (const [key, value] of Object.entries(settings)) {
-            await query(
+            await dbQuery(
                 'INSERT INTO SYSTEM_SETTINGS (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?, updated_at = CURRENT_TIMESTAMP',
                 [key, value, value]
             );
         }
 
-        await logAudit({
+        await auditLog({
             action: 'SYSTEM_SETTINGS_UPDATED',
             entityType: 'SYSTEM',
             entityId: 0,
             performedBy: req.user.userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
+            userAgent: req.get('user-agent'),
             details: settings
         });
 
@@ -339,7 +339,7 @@ export const getAllIssuedBooks = async (req: Request, res: Response): Promise<vo
             return;
         }
 
-        const issuedBooks = await query<any[]>(
+        const issuedBooks = await dbQuery<any[]>(
             `SELECT ib.*, u.full_name, u.email, b.title, b.author 
        FROM ISSUED_BOOKS ib 
        JOIN USERS u ON ib.user_id = u.user_id 
@@ -366,7 +366,7 @@ export const getAuditLogsAdmin = async (req: Request, res: Response): Promise<vo
         const limitInt = parseInt(limit as string) || 10;
         const offsetInt = parseInt(offset as string) || 0;
 
-        const logs = await query<any[]>(
+        const logs = await dbQuery<any[]>(
             `SELECT al.*, u.full_name as user_name 
              FROM AUDIT_LOGS al 
              LEFT JOIN USERS u ON al.performed_by = u.user_id 
@@ -392,7 +392,7 @@ export const getAllRequests = async (req: Request, res: Response): Promise<void>
                FROM REQUESTS r 
                LEFT JOIN USERS u ON r.user_id = u.user_id
                ORDER BY r.created_at DESC`;
-        const requests = await query<any[]>(sql);
+        const requests = await dbQuery<any[]>(sql);
 
         res.status(200).json({ requests });
     } catch (error) {
@@ -411,7 +411,7 @@ export const approveRequest = async (req: Request, res: Response): Promise<void>
         const requestId = parseInt(req.params.id);
 
         // Fetch request details to check for side effects
-        const requests = await query<any[]>(
+        const requests = await dbQuery<any[]>(
             'SELECT * FROM REQUESTS WHERE request_id = ?',
             [requestId]
         );
@@ -430,7 +430,7 @@ export const approveRequest = async (req: Request, res: Response): Promise<void>
                 : request.details;
 
             if (details.new_batch || details.new_time_slot) {
-                await query(
+                await dbQuery(
                     'UPDATE USERS SET batch = ?, time_slot = ? WHERE user_id = ?',
                     [
                         details.new_batch || null,
@@ -439,30 +439,30 @@ export const approveRequest = async (req: Request, res: Response): Promise<void>
                     ]
                 );
 
-                await logAudit({
+                await auditLog({
                     action: 'USER_BATCH_UPDATED_VIA_REQUEST',
                     entityType: 'USER',
                     entityId: request.user_id,
                     performedBy: req.user.userId,
                     ipAddress: req.ip,
-                    userAgent: req.headers['user-agent'],
+                    userAgent: req.get('user-agent'),
                     details: { ...details, request_id: requestId }
                 });
             }
         }
 
-        await query(
+        await dbQuery(
             'UPDATE REQUESTS SET status = ?, admin_id = ? WHERE request_id = ?',
             ['APPROVED', req.user.userId, requestId]
         );
 
-        await logAudit({
+        await auditLog({
             action: 'REQUEST_APPROVED',
             entityType: 'REQUEST',
             entityId: requestId,
             performedBy: req.user.userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent']
+            userAgent: req.get('user-agent')
         });
 
         res.status(200).json({ message: 'Request approved successfully and changes applied' });
@@ -482,18 +482,18 @@ export const rejectRequest = async (req: Request, res: Response): Promise<void> 
         const requestId = parseInt(req.params.id);
         const { reason } = req.body;
 
-        await query(
+        await dbQuery(
             'UPDATE REQUESTS SET status = ?, admin_response = ?, admin_id = ? WHERE request_id = ?',
             ['REJECTED', reason || null, req.user.userId, requestId]
         );
 
-        await logAudit({
+        await auditLog({
             action: 'REQUEST_REJECTED',
             entityType: 'REQUEST',
             entityId: requestId,
             performedBy: req.user.userId,
             ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
+            userAgent: req.get('user-agent'),
             details: { reason }
         });
 
@@ -510,7 +510,7 @@ export const getAllPayments = async (req: Request, res: Response): Promise<void>
             return;
         }
 
-        const payments = await query<any[]>(
+        const payments = await dbQuery<any[]>(
             `SELECT p.*, u.full_name, u.email 
              FROM PAYMENTS p 
              JOIN USERS u ON p.user_id = u.user_id 
@@ -533,7 +533,7 @@ export const getPaymentReceipt = async (req: Request, res: Response): Promise<vo
 
         const { id } = req.params;
 
-        const payments = await query<any[]>(
+        const payments = await dbQuery<any[]>(
             `SELECT p.*, u.full_name, u.email, u.phone, 
                     admin.full_name as admin_name
              FROM PAYMENTS p 

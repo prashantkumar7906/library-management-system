@@ -1,0 +1,44 @@
+﻿
+> library-backend@1.0.0 build
+> tsc
+
+src/controllers/admin.controller-requests.ts(4,18): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(4,30): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(5,17): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+src/controllers/admin.controller-requests.ts(9,32): error TS2304: Cannot find name 'query'.
+src/controllers/admin.controller-requests.ts(16,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+src/controllers/admin.controller-requests.ts(19,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+src/controllers/admin.controller-requests.ts(25,18): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(25,30): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(26,17): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+src/controllers/admin.controller-requests.ts(30,40): error TS2339: Property 'params' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(32,15): error TS2304: Cannot find name 'query'.
+src/controllers/admin.controller-requests.ts(34,30): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(37,15): error TS2304: Cannot find name 'logAudit'.
+src/controllers/admin.controller-requests.ts(41,30): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(42,28): error TS2339: Property 'ip' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(43,24): error TS7052: Element implicitly has an 'any' type because type 'Headers' has no index signature. Did you mean to call 'req.headers.get'?
+src/controllers/admin.controller-requests.ts(46,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+src/controllers/admin.controller-requests.ts(49,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+src/controllers/admin.controller-requests.ts(55,18): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(55,30): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(56,17): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+src/controllers/admin.controller-requests.ts(60,40): error TS2339: Property 'params' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(61,17): error TS2339: Property 'reason' does not exist on type 'ReadableStream<any> | null'.
+src/controllers/admin.controller-requests.ts(63,15): error TS2304: Cannot find name 'query'.
+src/controllers/admin.controller-requests.ts(65,46): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(68,15): error TS2304: Cannot find name 'logAudit'.
+src/controllers/admin.controller-requests.ts(72,30): error TS2339: Property 'user' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(73,28): error TS2339: Property 'ip' does not exist on type 'Request'.
+src/controllers/admin.controller-requests.ts(74,24): error TS7052: Element implicitly has an 'any' type because type 'Headers' has no index signature. Did you mean to call 'req.headers.get'?
+src/controllers/admin.controller-requests.ts(78,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+src/controllers/admin.controller-requests.ts(81,13): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
