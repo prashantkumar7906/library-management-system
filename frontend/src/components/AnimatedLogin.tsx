@@ -197,22 +197,6 @@ const AnimatedLogin: React.FC = () => {
                         )}
                     </motion.button>
                 </form>
-
-                {/* Demo Credentials */}
-                <motion.div
-                    className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                >
-                    <p className="text-xs text-white/60 mb-2">Demo Credentials:</p>
-                    <p className="text-sm text-white/80">
-                        <strong>Admin:</strong> libadmin@library.com / admin123
-                    </p>
-                    <p className="text-sm text-white/80">
-                        <strong>Member:</strong> member@library.com / member123
-                    </p>
-                </motion.div>
             </motion.div>
         </motion.div>
     );
