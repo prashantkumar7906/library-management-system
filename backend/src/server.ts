@@ -44,8 +44,26 @@ io.on('connection', (socket) => {
 
 // Middleware
 app.use(helmet());
+
+// CORS configuration - dynamic origin support
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'https://library-management-system-uvdj.vercel.app',
+    'http://localhost:5173'
+].filter(Boolean) as string[];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        // Log origins for debugging
+        if (origin) console.log(`📡 Incoming request from origin: ${origin}`);
+
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+            callback(null, true);
+        } else {
+            console.log(`❌ CORS blocked origin: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(compression());
