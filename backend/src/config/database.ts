@@ -4,21 +4,25 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Database configuration
-const dbConfig = {
-    host: process.env.MYSQLHOST || process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.MYSQLPORT || process.env.DB_PORT || '3306'),
-    user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
-    password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
-    database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'railway',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 0
-};
+const dbConfig: any = process.env.MYSQL_URL || process.env.DATABASE_URL || process.env.MYSQL_PUBLIC_URL
+    ? { uri: process.env.MYSQL_URL || process.env.DATABASE_URL || process.env.MYSQL_PUBLIC_URL }
+    : {
+        host: process.env.MYSQLHOST || process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.MYSQLPORT || process.env.DB_PORT || '3306'),
+        user: process.env.MYSQLUSER || process.env.DB_USER || 'root',
+        password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
+        database: process.env.MYSQLDATABASE || process.env.DB_NAME || 'railway',
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 0
+    };
 
 // Create connection pool
-const pool = mysql.createPool(dbConfig);
+const pool = dbConfig.uri
+    ? mysql.createPool(dbConfig.uri)
+    : mysql.createPool(dbConfig);
 
 // Test database connection
 export const testConnection = async (): Promise<void> => {

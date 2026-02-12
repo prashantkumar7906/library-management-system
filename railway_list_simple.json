@@ -1,0 +1,89 @@
+﻿[
+  {
+    "workspace": {
+      "id": "289742bc-a289-480e-b8c8-e135cdffa607",
+      "name": "prashantkumar7906's Projects"
+    },
+    "id": "afa95490-7a44-4efb-a571-9f251cd7c515",
+    "name": "devoted-radiance",
+    "createdAt": "2026-02-12T15:59:14.972Z",
+    "updatedAt": "2026-02-12T17:54:13.288Z",
+    "deletedAt": null,
+    "environments": {
+      "edges": [
+        {
+          "node": {
+            "id": "b9841ebe-0d72-40c5-9d64-49439e020b6e",
+            "name": "production",
+            "canAccess": true,
+            "serviceInstances": {
+              "edges": [
+                {
+                  "node": {
+                    "serviceId": "e29964ce-f63b-4a20-97e3-ea767c61c17d"
+                  }
+                },
+                {
+                  "node": {
+                    "serviceId": "608a5e86-3239-4305-8af3-4f1f710af718"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "services": {
+      "edges": [
+        {
+          "node": {
+            "id": "608a5e86-3239-4305-8af3-4f1f710af718",
+            "name": "MySQL"
+          }
+        },
+        {
+          "node": {
+            "id": "e29964ce-f63b-4a20-97e3-ea767c61c17d",
+            "name": "library-management-system"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "workspace": {
+      "id": "289742bc-a289-480e-b8c8-e135cdffa607",
+      "name": "prashantkumar7906's Projects"
+    },
+    "id": "a4060020-3f36-4441-9e2e-aaad21f85e15",
+    "name": "diplomatic-education",
+    "createdAt": "2026-02-12T16:25:52.047Z",
+    "updatedAt": "2026-02-12T17:37:27.951Z",
+    "deletedAt": null,
+    "environments": {
+      "edges": [
+        {
+          "node": {
+            "id": "249dfdf3-f386-4ba5-974f-fab3d7fcc76b",
+            "name": "production",
+            "canAccess": true,
+            "serviceInstances": {
+              "edges": []
+            }
+          }
+        }
+      ]
+    },
+    "services": {
+      "edges": [
+        {
+          "node": {
+            "id": "6ddcd8c0-0926-4c7e-9321-6c8e7ac8958c",
+            "name": "library-management-system"
+          }
+        }
+      ]
+    }
+  }
+]
