@@ -1,0 +1,9 @@
+-- Migration to add time_slot and BATCH_CHANGE request type
+
+-- Add time_slot column to USERS table
+ALTER TABLE USERS 
+ADD COLUMN time_slot VARCHAR(50) DEFAULT NULL AFTER batch;
+
+-- Expand REQUESTS table type column
+ALTER TABLE REQUESTS 
+MODIFY COLUMN type ENUM('BOOK_REQUEST', 'SUBSCRIPTION_EXTENSION', 'PENALTY_WAIVER', 'MEMBERSHIP_REGISTRATION', 'BATCH_CHANGE', 'OTHER') NOT NULL;
